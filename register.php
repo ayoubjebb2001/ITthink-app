@@ -1,12 +1,28 @@
 <?php
-
-require __DIR__ . '/../src/bootstrap.php'; 
-require __DIR__ . '/../src/register.php';
-
-view('header', ['title' => 'Register']);
+require_once __DIR__. '/init.php';
+require_once __DIR__. '/register-handler.php';
 
 
+// Get any stored messages
+$errors = $_SESSION['errors'] ?? [];
+$inputs = $_SESSION['inputs'] ?? [];
+
+// Clear stored messages
+unset($_SESSION['errors'], $_SESSION['inputs']);
 ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.6.2/css/all.min.css">
+    <title> ITTHINK-APP</title>
+</head>
+
+<body>
 <section class="vh-100">
     <div class="container h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
@@ -25,15 +41,11 @@ view('header', ['title' => 'Register']);
                                         <i class="fas fa-user fa-lg me-3 fa-fw"></i>
                                         <div data-mdb-input-init class="form-outline flex-fill mb-0">
                                             <label class="form-label" for="username">Your Name</label>
-                                            <input type="text" id="username" class="form-control" name="name"
-                                                value="<?= $inputs['username'] ?? '' ?>"/>
+                                            <input type="text" class="form-control <?= isset($errors['username']) ? 'is-invalid' : '' ?>" id="username" name="username" value="<?= htmlspecialchars($inputs['username'] ?? '') ?>">
+                                            <?php if (isset($errors['username'])): ?>
+                                                <div class="invalid-feedback"><?= $errors['username'] ?></div>
+                                            <?php endif; ?>
                                         </div>
-                                    </div>
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        You should check in on some of those fields below.
-                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                          <span aria-hidden="true">&times;</span>
-                                        </button>
                                     </div>
                                     <!-- User Name -->
 
@@ -42,8 +54,10 @@ view('header', ['title' => 'Register']);
                                         <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
                                         <div data-mdb-input-init class="form-outline flex-fill mb-0">
                                             <label class="form-label" for="email">Your Email</label>
-                                            <input type="email" id="email" class="form-control" name="email"
-                                                value="<?= $inputs['email'] ?? '' ?>"/>
+                                            <input type="email" class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>" id="email" name="email" value="<?= htmlspecialchars($inputs['email'] ?? '') ?>">
+                                <?php if (isset($errors['email'])): ?>
+                                    <div class="invalid-feedback"><?= $errors['email'] ?></div>
+                                <?php endif; ?>
                                         </div>
                                     </div>
                                     <!-- User Email -->
@@ -53,16 +67,21 @@ view('header', ['title' => 'Register']);
                                         <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
                                         <div data-mdb-input-init class="form-outline flex-fill mb-0">
                                             <label class="form-label" for="password">Password</label>
-                                            <input type="password" id="password" class="form-control" name="password"
-                                                value="<?= $inputs['password'] ?? '' ?>">
+                                            <input type="password" 
+                                       class="form-control <?= isset($errors['password']) ? 'is-invalid' : '' ?>" 
+                                       id="password" 
+                                       name="password">
+                                <?php if (isset($errors['password'])): ?>
+                                    <div class="invalid-feedback"><?= $errors['password'] ?></div>
+                                <?php endif; ?>
                                         </div>
                                     </div>
                                     <!-- User Password -->
 
                                     <!--Register Button-->
                                     <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                                        <button type="button" data-mdb-button-init data-mdb-ripple-init
-                                            class="btn btn-primary btn-lg">Register</button>
+                                        <button type="submit" data-mdb-button-init data-mdb-ripple-init
+                                            class="btn btn-primary btn-lg" name="submit">Register</button>
                                     </div>
                                     <!--Register Button-->
 
@@ -88,4 +107,8 @@ view('header', ['title' => 'Register']);
         </div>
     </div>
 </section>
-<?php view('footer') ?>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
