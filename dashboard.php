@@ -8,17 +8,28 @@ if (!isset($_SESSION['user'])) {
    exit();
 }
 
-$today = Date('Y-m-d');
 // Fetch statistics
 $stats = [
    'users' => $pdo->query("SELECT COUNT(*) FROM utilisateurs")->fetchColumn(),
    'projects' => $pdo->query("SELECT COUNT(*) FROM projets")->fetchColumn(),
    'freelancers' => $pdo->query("SELECT COUNT(*) FROM freelances")->fetchColumn(),
-   'pending_offers' => $pdo->query("SELECT COUNT(*) FROM offres WHERE delai < $today ")->fetchColumn()
+   'pending_offers' => $pdo->query("SELECT COUNT(*) FROM offres WHERE delai < NOW()")->fetchColumn()
 ];
 
-$pending_offers = $pdo->query("SELECT nom_utilisateur as project_owner,titre_projet,montant,delai,nom_freelance FROM utilisateurs NATURAL JOIN projets NATURAL JOIN offres NATURAL JOIN freelances
-                                 WHERE delai < $today")->fetchAll(PDO::FETCH_ASSOC);
+// Fetch pending offers
+$sql = "SELECT nom_utilisateur as project_owner,titre_projet,montant,delai,nom_categorie,nom_freelance 
+FROM utilisateurs u
+JOIN projets pr
+JOIN categories ca
+JOIN offres ofr
+JOIN freelances fr
+ON u.id_utilisateur = pr.id_utilisateur
+and ca.id_categorie = pr.id_categorie
+and ofr.id_projet = pr.id_projet
+and ofr.id_freelance = fr.id_freelance
+WHERE delai < NOW();";
+$stmt = $pdo->query($sql);
+$pending_offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -224,11 +235,10 @@ $pending_offers = $pdo->query("SELECT nom_utilisateur as project_owner,titre_pro
                                  <td><?php echo $offer['titre_projet']; ?></td>
                                  <td><?php echo $offer['montant']; ?></td>
                                  <td><?php echo $offer['delai']; ?></td>
-                                 <td><?php echo $offer['nom_freelance']; ?></td>
+                                 <td><?php echo $offer['nom_freelance'] ?></td>
                               </tr>
                            <?php endforeach; ?>
                         </tbody>
-                     <!-- Add offers table here -->
                   </div>
                </div>
             </div>
