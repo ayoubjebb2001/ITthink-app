@@ -1,7 +1,7 @@
 <?php
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
     $inputs = [];
     $errors = [];
@@ -31,10 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':email', $email,PDO::PARAM_STR);
             $stmt->execute();
-            $user = $stmt->fetch();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($user && password_verify($password, $user['mot_de_passe'])) {
                 $_SESSION['user'] = $user;
-                header("Location: index.php");
+                header("Location: dashboard.php");
                 exit;
             } else {
                 $errors['general'] = 'Invalid email or password';
