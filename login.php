@@ -1,16 +1,17 @@
 <?php
-session_start();
-require_once __DIR__. '/init.php';
-require_once __DIR__. '/register-handler.php';
+    session_start();
+    require_once __DIR__. '/init.php';
+    require_once __DIR__. '/login-handler.php';
 
+    if(isset($_GET['success'])){
+        $inputs = $_SESSION['inputs'] || [];
+        $errors = $_SESSION['errors'] || [];
+        unset($_SESSION['inputs'],$_SESSION['errors']);
+    
+    }
 
-// Get any stored messages
-$errors = $_SESSION['errors'] ?? [];
-$inputs = $_SESSION['inputs'] ?? [];
-
-// Clear stored messages
-unset($_SESSION['errors'], $_SESSION['inputs']);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,20 +36,7 @@ unset($_SESSION['errors'], $_SESSION['inputs']);
                                 <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
 
                                 <!-- Form Start-->
-                                <form class="mx-1 mx-md-4" method="post" action="register.php">
-
-                                    <!-- User Name -->
-                                    <div class="d-flex flex-row align-items-center mb-4">
-                                        <i class="fas fa-user fa-lg me-3 fa-fw"></i>
-                                        <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                                            <label class="form-label" for="username">Your Name</label>
-                                            <input type="text" class="form-control <?= isset($errors['username']) ? 'is-invalid' : '' ?>" id="username" name="username" value="<?= htmlspecialchars($inputs['username'] ?? '') ?>">
-                                            <?php if (isset($errors['username'])): ?>
-                                                <div class="invalid-feedback"><?= $errors['username'] ?></div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                    <!-- User Name -->
+                                <form class="mx-1 mx-md-4" method="post" action="login.php">
 
                                     <!-- User Email -->
                                     <div class="d-flex flex-row align-items-center mb-4">
@@ -82,13 +70,13 @@ unset($_SESSION['errors'], $_SESSION['inputs']);
                                     <!--Register Button-->
                                     <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
                                         <button type="submit" data-mdb-button-init data-mdb-ripple-init
-                                            class="btn btn-primary btn-lg" name="submit">Register</button>
+                                            class="btn btn-primary btn-lg" name="submit">Login</button>
                                     </div>
                                     <!--Register Button-->
 
                                     <!-- Login link -->
-                                    <p class="text-center text-muted mt-5 mb-0">Have already an account?
-                                        <a href="login.php" class="fw-bold text-body"><u>Login here</u></a>
+                                    <p class="text-center text-muted mt-5 mb-0">Don't Have an account?
+                                        <a href="register.php" class="fw-bold text-body"><u>Register here</u></a>
                                     </p>
                                     <!-- Login link -->
 

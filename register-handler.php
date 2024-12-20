@@ -10,11 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
-
-    echo '<pre>';
-    var_dump($username,$email,$password);
-    echo '</pre>';
-    
+  
     // Validate form data
     if (empty($username)) {
         $errors['username'] = 'Username is required';
@@ -37,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             $role="user";
             $sql = "SELECT count(*) from utilisateurs";
             $count = $pdo->query($sql)->fetch()[0];
-            $role = $count < 0? "admin":$role;
+            $role = $count < 1? "admin":$role;
             $sql = "INSERT INTO utilisateurs (nom_utilisateur, email, mot_de_passe,role) VALUES (?, ?, ?,?)";
             $stmt = $pdo->prepare($sql);
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
