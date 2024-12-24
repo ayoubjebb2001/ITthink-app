@@ -2,34 +2,19 @@
 session_start();
 require_once 'init.php';
 
-// Check if user is logged in
+// Check if user is logged in and is an admin
 if (!isset($_SESSION['user'])) {
    header('Location: login.php');
    exit();
+} elseif ($_SESSION['user']['role'] != 'admin') {
+   header('Location: dashboard.php');
+   exit();
 }
 
-// Fetch statistics
-$stats = [
-   'users' => $pdo->query("SELECT COUNT(*) FROM utilisateurs")->fetchColumn(),
-   'projects' => $pdo->query("SELECT COUNT(*) FROM projets")->fetchColumn(),
-   'freelancers' => $pdo->query("SELECT COUNT(*) FROM freelances")->fetchColumn(),
-   'pending_offers' => $pdo->query("SELECT COUNT(*) FROM offres WHERE delai < NOW()")->fetchColumn()
-];
-
-// Fetch pending offers
-$sql = "SELECT nom_utilisateur as project_owner,titre_projet,montant,delai,nom_categorie,nom_freelance 
-FROM utilisateurs u
-JOIN projets pr
-JOIN categories ca
-JOIN offres ofr
-JOIN freelances fr
-ON u.id_utilisateur = pr.id_utilisateur
-and ca.id_categorie = pr.id_categorie
-and ofr.id_projet = pr.id_projet
-and ofr.id_freelance = fr.id_freelance
-WHERE delai < NOW();";
+// Fetch users
+$sql = "SELECT * from utilisateurs";
 $stmt = $pdo->query($sql);
-$pending_offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -139,14 +124,13 @@ $pending_offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
    <!-- Sidebar -->
    <div class="l-navbar" id="nav-bar">
       <nav class="nav">
-         <?php if ($_SESSION['user']['role'] === 'admin') : ?>
             <div>
                <a href="dashboard.php" class="nav_logo">
                   <i class='bx bx-layer nav_logo-icon'></i>
                   <span class="nav_logo-name">ITThink</span>
                </a>
                <div class="nav_list">
-                  <a href="#" class="nav_link active">
+                  <a href="dashboard.php" class="nav_link active">
                      <i class='bx bx-grid-alt nav_icon'></i>
                      <span class="nav_name">Dashboard</span>
                   </a>
@@ -164,28 +148,6 @@ $pending_offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   </a>
                </div>
             </div>
-         <?php else: ?>
-            <div>
-               <a href="dashboard.php" class="nav_logo">
-                  <i class='bx bx-layer nav_logo-icon'></i>
-                  <span class="nav_logo-name">ITThink</span>
-               </a>
-               <div class="nav_list">
-                  <a href="#" class="nav_link active">
-                     <i class='bx bx-grid-alt nav_icon'></i>
-                     <span class="nav_name">Dashboard</span>
-                  </a>
-                  <a href="users.php" class="nav_link">
-                     <i class='bx bx-user nav_icon'></i>
-                     <span class="nav_name">My Projects</span>
-                  </a>
-                  <a href="projects.php" class="nav_link">
-                     <i class='bx bx-folder nav_icon'></i>
-                     <span class="nav_name">My offers</span>
-                  </a>
-               </div>
-            </div>
-         <?php endif; ?>
          <a href="logout.php" class="nav_link">
             <i class='bx bx-log-out nav_icon'></i>
             <span class="nav_name">SignOut</span>
@@ -200,65 +162,42 @@ $pending_offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <h2>Welcome, <?php echo htmlspecialchars($_SESSION['user']['nom_utilisateur']); ?>!</h2>
             <p>Here's your dashboard overview</p>
          </div>
-         <!-- Statistics Cards -->
-         <div class="row mb-4">
-            <div class="col-md-3">
-               <div class="stats-card">
-                  <h3><?php echo $stats['users']; ?></h3>
-                  <p>Total Users</p>
-                  <i class='bx bx-user'></i>
-               </div>
-            </div>
-            <div class="col-md-3">
-               <div class="stats-card">
-                  <h3><?php echo $stats['projects']; ?></h3>
-                  <p>Active Projects</p>
-                  <i class='bx bx-folder'></i>
-               </div>
-            </div>
-            <div class="col-md-3">
-               <div class="stats-card">
-                  <h3><?php echo $stats['freelancers']; ?></h3>
-                  <p>Freelancers</p>
-                  <i class='bx bx-code-alt'></i>
-               </div>
-            </div>
-            <div class="col-md-3">
-               <div class="stats-card">
-                  <h3><?php echo $stats['pending_offers']; ?></h3>
-                  <p>Pending Offers</p>
-                  <i class='bx bx-time'></i>
-               </div>
-            </div>
-         </div>
-
-         <!-- Recent Activity -->
+         <!-- Users CRUD -->
          <div class="row">
             <div class="col-md-12">
                <div class="card">
                   <div class="card-header">
-                     <h5 class="card-title">Pending Offers</h5>
+                     <h5 class="card-title">Users</h5>
                   </div>
                   <div class="card-body">
                      <!-- Use DataTables here -->
-                     <table id="offers" class="table table-striped">
+                     <table id="users" class="table table-striped">
                         <thead>
                            <tr>
-                              <th>Project Owner</th>
-                              <th>Project Title</th>
-                              <th>Amount</th>
-                              <th>Deadline</th>
-                              <th>Freelancer</th>
+                              <th>username</th>
+                              <th>email</th>
+                              <th>role</th>
+                              <th>Action</th>
                            </tr>
                         </thead>
                         <tbody>
-                           <?php foreach ($pending_offers as $offer) : ?>
+                           <?php foreach ($users as $user) : ?>
                               <tr>
-                                 <td><?php echo $offer['project_owner']; ?></td>
-                                 <td><?php echo $offer['titre_projet']; ?></td>
-                                 <td><?php echo $offer['montant']; ?></td>
-                                 <td><?php echo $offer['delai']; ?></td>
-                                 <td><?php echo $offer['nom_freelance'] ?></td>
+                                 <td><?php echo $user['nom_utilisateur']; ?></td>
+                                 <td><?php echo $user['email']; ?></td>
+                                 <td><?php
+                                    if($user['role'] == "admin") :?>
+                                        <span class="badge bg-primary">Admin</span>
+                                    <?php elseif($user['role'] == "user") :?>
+                                        <span class="badge bg-secondary">User</span>
+                                    <?php else :?>
+                                        <span class="badge bg-dark">Freelancer</span>
+                                    <?php endif; ?>
+                                 </td>
+                                 <td>
+                                    <a href="edit_user.php?id=<?php echo $user['id_utilisateur']; ?>" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="delete_user.php?id=<?php echo $user['id_utilisateur']; ?>" class="btn btn-sm btn-danger">Delete</a>
+                                 </td>
                               </tr>
                            <?php endforeach; ?>
                         </tbody>
@@ -273,10 +212,9 @@ $pending_offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
    <script>
-      $("#offers").DataTable({
+      $("#users").DataTable({
          "paging": true,
          "ordering": true,
-         "info": true
       });
    </script>
 </body>
